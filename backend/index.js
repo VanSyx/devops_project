@@ -34,12 +34,12 @@ async function connectDB() {
   `);
 }
 
-// ✅ /health
+// /health
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// ✅ /about - thông tin sinh viên
+// /about - thông tin sinh viên
 app.get('/about', (req, res) => {
   res.json({
     ho_ten: 'Trần Văn Sỹ',        
@@ -49,13 +49,13 @@ app.get('/about', (req, res) => {
   });
 });
 
-// ✅ GET /students - Lấy danh sách sinh viên
+// GET /students - Lấy danh sách sinh viên
 app.get('/students', async (req, res) => {
   const [rows] = await db.execute('SELECT * FROM students ORDER BY created_at DESC');
   res.json(rows);
 });
 
-// ✅ POST /students - Thêm sinh viên mới
+// POST /students - Thêm sinh viên mới
 app.post('/students', async (req, res) => {
   const { name, email } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
