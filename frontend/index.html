@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>DevOps Mini Project</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    nav a { margin-right: 16px; text-decoration: none; color: #0077cc; font-weight: bold; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #0077cc; color: white; }
+    input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; width: 200px; }
+    button { padding: 8px 16px; background: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .card { background: #f0f7ff; border-left: 4px solid #0077cc; padding: 16px; margin: 20px 0; border-radius: 4px; }
+    #page-home, #page-about { display: none; }
+    #page-home.active, #page-about.active { display: block; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="#" onclick="showPage('home')">Trang chủ</a>
+    <a href="#" onclick="showPage('about')">Về tôi</a>
+  </nav>
+
+  <!-- Trang chủ -->
+  <div id="page-home" class="active">
+    <h1>Danh sách sinh viên</h1>
+    <div>
+      <input type="text" id="name" placeholder="Họ tên sinh viên">
+      <input type="text" id="email" placeholder="Email">
+      <button onclick="addStudent()">Thêm sinh viên</button>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Họ tên</th><th>Email</th></tr></thead>
+      <tbody id="student-list"></tbody>
+    </table>
+  </div>
+
+  <!-- Trang about -->
+  <div id="page-about">
+    <h1>Thông tin sinh viên</h1>
+    <div class="card" id="about-info">Đang tải...</div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+
+    function showPage(page) {
+      document.getElementById('page-home').classList.remove('active');
+      document.getElementById('page-about').classList.remove('active');
+      document.getElementById('page-' + page).classList.add('active');
+      if (page === 'home') loadStudents();
+      if (page === 'about') loadAbout();
+    }
+
+    async function loadStudents() {
+      const res = await fetch(API + '/students');
+      const data = await res.json();
+      const tbody = document.getElementById('student-list');
+      tbody.innerHTML = data.map(s =>
+        `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email || '-'}</td></tr>`
+      ).join('');
+    }
+
+    async function addStudent() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!name) return alert('Vui lòng nhập họ tên');
+      await fetch(API + '/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      loadStudents();
+    }
+
+    async function loadAbout() {
+      const res = await fetch(API + '/about');
+      const d = await res.json();
+      document.getElementById('about-info').innerHTML = `
+        <p><strong>Họ tên:</strong> ${d.ho_ten}</p>
+        <p><strong>MSSV:</strong> ${d.ma_so_sinh_vien}</p>
+        <p><strong>Lớp:</strong> ${d.lop}</p>
+        <p><strong>Ứng dụng:</strong> ${d.app_name}</p>
+      `;
+    }
+
+    loadStudents();
+  </script>
+</body>
+</html>
